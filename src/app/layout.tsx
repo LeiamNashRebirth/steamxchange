@@ -1,3 +1,5 @@
+'use client';
+
 import "./globals.css";
 import AuthGuard from "@/components/AuthGuard";
 import Navigation from "@/components/Navigation";
