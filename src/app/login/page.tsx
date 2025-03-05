@@ -40,7 +40,7 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [gradeLevel, setGradeLevel] = useState('');
   const [section, setSection] = useState('');
-  const [adviser, setAdviser] = useState(null);
+  const [adviser, setAdviser] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [otpError, setOtpError] = useState('');
@@ -58,17 +58,13 @@ const Signup = () => {
         clientUID = uuidv4();
         localStorage.setItem('clientUID', clientUID);
       }
-      try {
-        const dataUser = await database.getUserData(clientUID);
-        if (dataUser?.id === clientUID) {
-          router.push('/');
-        }
-      } catch (error) {}
+      const dataUser = await database.getUserData(clientUID);
+      if (dataUser?.id === clientUID) return router.push('/');
     };
     checkClientLogin();
   }, [router]);
 
-  const handleDobChange = (e) => {
+  const handleDobChange = (e: any) => {
   const selectedDate = new Date(e.target.value);
   const currentYear = new Date().getFullYear();
   const cutoffYear = currentYear - 16;
@@ -122,9 +118,9 @@ const Signup = () => {
         schoolID,
         birthday: dob,
         createdAt: new Date().toISOString(),
-        adviserName: adviser.name,
-        adviserIcon: adviser.icon,
-        adviserSubject: adviser.subject,
+        adviserName: adviser.name, 
+          adviserIcon: adviser?.icon,
+          adviserSubject: adviser.subject,
       };
 
       await database.loginUser(userData);
