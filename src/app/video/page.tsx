@@ -58,7 +58,7 @@ useEffect(() => {
               >
                 <div className="relative">
                   {!loadedThumbnails[video.id] && (
-                    <Skeleton className="h-64 w-full rounded-t-lg bg-gray-800" />
+                    <Skeleton className="h-[20vh] lg:h-[20vh] w-full rounded-t-lg bg-gray-800" />
                   )}
                   <img
                     src={video.thumbnail}

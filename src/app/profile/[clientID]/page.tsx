@@ -28,13 +28,12 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       const clientUID = localStorage.getItem("clientUID");
-      if (!clientUID) return router.push("/login");
+      if (!clientUID) return;
       setClientData(clientUID);
       
       const user = await database.getUserData(clientID);
       const posts = await database.getFeedData();
-      if (user?.error) return router.push("/login");
-
+      
       setUserData(user);
       setAllPosts(posts.filter((post) => post.uid === clientID));
       setIsOwner(clientUID === clientID);

@@ -33,7 +33,6 @@ const fetchVideoInfo = async () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row p-4 gap-6">
-      {/* Main Video Section */}
       <div className="w-full lg:w-3/4">
         {loading ? (
           <Skeleton className="w-full h-[25vh] lg:h-[45vh] rounded-lg bg-gray-800" />
@@ -45,8 +44,6 @@ const fetchVideoInfo = async () => {
             getInstance="function"
           />
         )}
-
-        {/* Video Details */}
         <div className="mt-4">
           {loading ? (
             <Skeleton className="h-6 w-3/4 bg-gray-800" />
@@ -62,8 +59,6 @@ const fetchVideoInfo = async () => {
             </p>
           )}
         </div>
-
-        {/* Channel Info */}
         <div className="flex items-center mt-4">
           {loading ? (
             <Skeleton className="h-12 w-12 rounded-full bg-gray-700" />
@@ -86,7 +81,6 @@ const fetchVideoInfo = async () => {
           </div>
         </div>
 
-        {/* Video Description */}
         <div className="mt-4 p-4 bg-gray-800 rounded-lg">
           {loading ? (
             <Skeleton className="h-32 w-full bg-gray-700" />
@@ -96,7 +90,6 @@ const fetchVideoInfo = async () => {
         </div>
       </div>
 
-      {/* Related Videos Sidebar */}
       <div className="w-full lg:w-1/4">
         {loadingRelated ? (
           Array.from({ length: 6 }).map((_, index) => (

@@ -21,6 +21,7 @@ const Player = ({ url, poster, getInstance, ...rest }) => {
             fullscreenWeb: true,
             fullscreen: true,
             autoOrientation: true,
+            mutex: true,
             type: "mp4",
             customType: {
              mp4: function (video, url) {

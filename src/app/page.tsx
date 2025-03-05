@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { database } from "@/utils/database";
-import { Heart, MessageCircle, Repeat } from "lucide-react";
+import { Heart, MessageCircle, Pin } from "lucide-react";
 import PostForm from "@/components/PostForm";
 import CommentSection from "@/components/CommentSection";
 import Images from "@/components/Images";
@@ -18,30 +18,24 @@ const Home = () => {
 
   useEffect(() => {
     const fetchUserDataAndPosts = async () => {
-      try {
         const clientUID = localStorage.getItem("clientUID");
-        if (!clientUID) return router.push("/login");
-
-        const user = await database.getUserData(clientUID);
-        if (user?.error) return router.push("/login");
+        if (!clientUID) return;
 
         const allPosts = await database.getFeedData();
         setPosts(
           allPosts.map((post: any) => ({
             ...post,
             likedByClient: post.liked.includes(clientUID),
+            pinnedByClient: post.pinned.includes(clientUID) || false,
           }))
         );
         setLoading(false);
-      } catch (error) {
-        router.push("/login");
-      }
     };
 
     fetchUserDataAndPosts();
   }, [router]);
 
-  const handleLike = async (postId: string) => {
+const handleLike = async (postId: string) => {
     const clientUID = localStorage.getItem("clientUID");
     if (!clientUID) return;
 
@@ -56,6 +50,23 @@ const Home = () => {
       );
     } catch (error) {}
   };
+
+  const handlePin = async (postId: string) => {
+  const clientUID = localStorage.getItem("clientUID");
+  if (!clientUID) return;
+
+  try {
+    const updatedPost = await database.addPin(clientUID, postId);
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId
+          ? { ...post, pins: updatedPost.pins, pinnedByClient: true }
+          : post
+      )
+    );
+  } catch (error) {}
+};
+  
 
   const toggleComments = (postId: string) => {
     setVisibleComments((prev) => ({
@@ -96,7 +107,7 @@ const Home = () => {
           {posts.map((post) => (
             <div key={post.id} className="p-4 border-b border-gray-700 hover:bg-gray-900 transition">
               <div className="flex items-start space-x-4">
-          <UserAvatar userId={post.uid} onClick={() => navigateToProfile(post.uid)} />
+                <UserAvatar userId={post.uid} onClick={() => navigateToProfile(post.uid)} />
                 <div>
                   <div className="flex items-center space-x-2">
                     <p className="font-bold text-white cursor-pointer" onClick={() => navigateToProfile(post.uid)}>
@@ -118,18 +129,8 @@ const Home = () => {
 
                   <div className="flex text-gray-500 mt-3 gap-x-6">
                     <button
-                      onClick={() => toggleComments(post.id)}
-                      className="flex items-center space-x-1 hover:text-blue-400 transition"
-                    >
-                      <MessageCircle className="w-5 h-5" />
-                      <span>{post.comments?.length}</span>
-                    </button>
-                    <button className="flex items-center space-x-1 hover:text-green-400 transition">
-                      <Repeat className="w-5 h-5" />
-                      <span>0</span>
-                    </button>
-                    <button
                       onClick={() => handleLike(post.id)}
+                      disabled={post.likedByClient}
                       className={`flex items-center space-x-1 transition ${
                         post.likedByClient ? "text-red-500" : "hover:text-red-400"
                       }`}
@@ -137,6 +138,24 @@ const Home = () => {
                       <Heart className={`w-5 h-5 ${post.likedByClient ? "fill-red-500" : ""}`} />
                       <span>{post.likes}</span>
                     </button>
+                    <button
+                      onClick={() => toggleComments(post.id)}
+                      className="flex items-center space-x-1 hover:text-blue-400 transition"
+                    >
+                      <MessageCircle className="w-5 h-5" />
+                      <span>{post.comments?.length}</span>
+                    </button>
+                    <button
+                      onClick={() => handlePin(post.id)}
+                      disabled={post.pinnedByClient}
+                      className={`flex items-center space-x-1 transition ${
+                        post.pinnedByClient ? "text-green-500" : "hover:text-green-400"
+                      }`}
+                    >
+                      <Pin className={`w-5 h-5 ${post.pinnedByClient ? "fill-green-500" : ""}`} />
+                      <span>{post.pins}</span>
+                    </button>
+
                   </div>
 
                   {visibleComments[post.id] && <CommentSection postId={post.id} />}

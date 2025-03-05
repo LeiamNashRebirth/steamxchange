@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { sendVerificationCode } from '@/utils/email';
 import { v4 as uuidv4 } from 'uuid';
 import { database } from '@/utils/database';
+import { motion } from "framer-motion";
 
 const sections = ["Curie", "Pascal", "Newton", "Einstein"]; 
 
@@ -136,11 +137,48 @@ const Signup = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
       {loadingScreen ? (
-        <div className="flex items-center justify-center h-screen">
-          <div className="w-12 h-12 border-4 border-gray-200 border-t-transparent rounded-full animate-spin"></div>
+        <div className="flex flex-col items-center justify-between h-screen w-full bg-gray-900 text-white overflow-hidden">
+          <motion.div
+            initial={{ y: 0, opacity: 1 }}
+            animate={{ y: -90, opacity: 1 }}
+            transition={{ duration: 1, ease: "easeInOut" }}
+            className="absolute top-1/3 transform -translate-y-1/2 flex justify-center w-full"
+          >
+            <img src="/logo.png" alt="Logo" width={220} height={60} className="object-contain" />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 0.8 }}
+            className="flex flex-col items-center absolute bottom-12"
+          >
+            <motion.div
+              className="flex space-x-2 mb-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+            >
+              <motion.div
+                className="w-3 h-3 bg-white rounded-full"
+                animate={{ y: [-5, 5, -5] }}
+                transition={{ repeat: Infinity, duration: 1.2, delay: 0 }}
+              />
+              <motion.div
+                className="w-3 h-3 bg-white rounded-full"
+                animate={{ y: [-5, 5, -5] }}
+                transition={{ repeat: Infinity, duration: 1.2, delay: 0.2 }}
+              />
+              <motion.div
+                className="w-3 h-3 bg-white rounded-full"
+                animate={{ y: [-5, 5, -5] }}
+                transition={{ repeat: Infinity, duration: 1.2, delay: 0.4 }}
+              />
+            </motion.div>
+            <p className="text-gray-400 text-sm">Developed by LeiamNash</p>
+          </motion.div>
         </div>
       ) : (
-  <div className="w-full max-w-md text-white">
+  <div className="max-w-xs text-white">
     <div className="flex bg-gray-900 justify-center">
     <img src="/logo.png" alt="leiamnash"/>
         </div>

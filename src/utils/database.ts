@@ -64,7 +64,7 @@ export const database = {
     const response = await fetch(`${DATABASE_URL}/FeedReplyComment/${id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JN.stringify({ ...data, commentId }),
+      body: JSON.stringify({ ...data, commentId }),
     });
     const result = await response.json();
     return result;
@@ -321,7 +321,28 @@ export const database = {
     const result = await response.json();
     return result;
   },
-    async chatUser(uid: string, receiverId: string, data: {
+  async addPin(uid: string, id: string) {
+      const userpin = await fetch(`${DATABASE_URL}/UserPin/${uid}/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+    const feedpin = await fetch(`${DATABASE_URL}/FeedAddPin/${uid}/${id}`, {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+    });
+    const feed = await feedpin.json();
+    const result = await userpin.json();
+    return result + feed;
+  },
+  async addFriend(uid: string, id: string) {
+      const response = await fetch(`${DATABASE_URL}/UserFriend/${uid}/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+    const result = await response.json();
+    return result;
+  },
+  async chatUser(uid: string, receiverId: string, data: {
       id: string;
       date: string;
       time: string;

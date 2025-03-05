@@ -20,6 +20,7 @@ const EditProfile = ({ userData, setEditOpen }) => {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [updating, setUpdating] = useState(false);
+  const [croppingLoading, setCroppingLoading] = useState(false);
 
   const iconInputRef = useRef(null);
   const bannerInputRef = useRef(null);
@@ -36,11 +37,13 @@ const EditProfile = ({ userData, setEditOpen }) => {
 
   const handleCropConfirm = async () => {
     if (!cropping) return;
+    setCroppingLoading(true);
     const croppedImage = await getCroppedImg(cropping.file, croppedAreaPixels);
     const previewUrl = URL.createObjectURL(croppedImage);
     cropping.setPreview(previewUrl);
     cropping.setImage(croppedImage);
     setCropping(null);
+    setCroppingLoading(false);
   };
 
   const handleUpdateAddress = () => {
@@ -154,7 +157,9 @@ const EditProfile = ({ userData, setEditOpen }) => {
             </div>
             <div className="flex justify-between mt-4">
               <button onClick={() => setCropping(null)} className="bg-gray-700 text-white py-2 px-4 rounded-md">Cancel</button>
-              <button onClick={handleCropConfirm} className="bg-blue-500 hover:bg-blue-600 py-2 px-4 rounded-md">Crop</button>
+              <button onClick={handleCropConfirm} className="bg-blue-500 hover:bg-blue-600 py-2 px-4 rounded-md flex items-center justify-center">
+                {croppingLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Crop"}
+              </button>
             </div>
           </div>
         </div>
