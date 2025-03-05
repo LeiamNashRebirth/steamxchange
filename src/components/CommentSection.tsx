@@ -106,7 +106,7 @@ const CommentSection = ({ postId, onClose }: { postId: string; onClose: () => vo
     setExpandedReplies((prev) => ({ ...prev, [commentDate]: !prev[commentDate] }));
   };
 
-  const formatDateTime = (dateString: string) => {
+const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return 'Invalid Date';
     const options = { month: 'short', day: 'numeric', year: 'numeric' } as const;

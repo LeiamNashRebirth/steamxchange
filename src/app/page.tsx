@@ -86,7 +86,7 @@ const handleLike = async (postId: string) => {
       </div>
 
       <div className="border-b border-gray-700 p-4">
-        <PostForm setPosts={setPosts} setPosting={() => {}} />
+        <PostForm setPosts={setPosts} />
       </div>
 
       {loading ? (
@@ -157,8 +157,7 @@ const handleLike = async (postId: string) => {
                     </button>
 
                   </div>
-
-                  {visibleComments[post.id] && <CommentSection postId={post.id} />}
+                  {visibleComments[post.id] && <CommentSection postId={post.id} onClose={() => toggleComments(post.id)} />}
                 </div>
               </div>
             </div>

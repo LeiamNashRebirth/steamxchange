@@ -8,11 +8,9 @@ import Profile from './Profile';
 import { X, Image, Video } from 'lucide-react';
 import { upload } from '@/utils/upload';
 
-interface PostFormProps {
+const PostForm = ({ setPosts }: { 
   setPosts: React.Dispatch<React.SetStateAction<any[]>>;
-}
-
-const PostForm = ({ setPosts }: PostFormProps) => {
+}) => {
   const [text, setText] = useState('');
   const [profileIcon, setProfileIcon] = useState('');
   const [isPosting, setIsPosting] = useState(false);

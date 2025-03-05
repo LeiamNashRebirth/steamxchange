@@ -11,7 +11,11 @@ import VideoPlayer from "@/components/VideoPlayer";
 const formatDateTime = (dateString: any) => {
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return "Invalid Date";
-  const options = { month: "short", day: "numeric", year: "numeric" };
+  const options: Intl.DateTimeFormatOptions = { 
+    month: "short", 
+    day: "numeric", 
+    year: "numeric" 
+  };
   return date.toLocaleDateString(undefined, options);
 };
 

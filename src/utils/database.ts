@@ -283,7 +283,7 @@ export const database = {
     createdAt: string;
     adviserName: string | null;
     adviserIcon: string | null;
-    adviserUrl: string | null;
+    adviserUrl: undefined;
     adviserSubject: string | null;
  }) {
     const response = await fetch(`${DATABASE_URL}/LoginUser`, {
