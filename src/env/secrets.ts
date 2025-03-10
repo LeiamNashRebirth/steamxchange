@@ -6,3 +6,4 @@ export const Verify = {
   email: 'stemxchangeapp@gmail.com',
   password: 'hgcx kkfy tfjf qtig'
 };
+export const GoogleKey = 'AIzaSyA-Cma0aGhg07a3E3uFqRDedYJqKl4djQE';

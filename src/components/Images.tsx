@@ -1,29 +1,51 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-const Images = ({ src, alt }: { src?: string; alt: string }) => {
+const Images = ({ src }: { src?: string }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [initialDelay, setInitialDelay] = useState(true);
+  const [showSkeleton, setShowSkeleton] = useState(true);
+  const [zoomedImage, setZoomedImage] = useState<string | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => setInitialDelay(false), 1000);
-    return () => clearTimeout(timer);
-  }, []);
+    if (zoomedImage) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+  }, [zoomedImage]);
+
+  useEffect(() => {
+    const delayTimer = setTimeout(() => {
+      if (imageLoaded) {
+        setShowSkeleton(false);
+      }
+    }, 1000);
+
+    return () => clearTimeout(delayTimer);
+  }, [imageLoaded]);
 
   return (
-    <div className="relative w-full" style={{ maxHeight: '400px' }}>
-      {(!imageLoaded || initialDelay) && (
-        <div className="w-full h-[900px] bg-gray-700 animate-pulse rounded-lg mb-4"></div>
+    <div>
+      {showSkeleton && (
+        <div className="w-full h-[500px] bg-gray-700 animate-pulse rounded-lg mb-4"></div>
       )}
+
       {src && (
         <img
           src={src}
-          alt={alt}
-          className={`w-full max-h-[400px] object-contain rounded-lg transition-opacity duration-500 ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-          style={{ maxHeight: '400px' }}
-          onLoad={() => setImageLoaded(true)}
+          alt="LeiamNash"
+          className={`w-full rounded-xl hover:scale-105 transition-opacity duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+          onLoad={() => {
+            setImageLoaded(true);
+            setShowSkeleton(false);
+          }}
+          onClick={() => setZoomedImage(src)}
         />
+      )}
+
+      {zoomedImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50" onClick={() => setZoomedImage(null)}>
+          <img src={zoomedImage} alt="LeiamNash" className="max-w-full max-h-full" />
+        </div>
       )}
     </div>
   );

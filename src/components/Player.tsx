@@ -10,8 +10,8 @@ const Player = ({ url, poster, getInstance, ...rest }) => {
             container: artRef.current,
             url: url, 
             poster: poster,
-            theme: "#FFFFFF",
-            autoplay: true,
+            theme: "#FFFFF",
+            autoplay: false,
             flip: true,
             playbackRate: true,
             aspectRatio: true,
@@ -22,13 +22,13 @@ const Player = ({ url, poster, getInstance, ...rest }) => {
             fullscreen: true,
             autoOrientation: true,
             mutex: true,
+            muted: false,
             type: "mp4",
             customType: {
              mp4: function (video, url) {
         video.src = url;
 video.setAttribute("crossorigin", "anonymous");
         video.load();
-        video.play();
   },
  },
 });

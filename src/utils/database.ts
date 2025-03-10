@@ -2,6 +2,29 @@ import { Database } from '@/env/secrets';
 let DATABASE_URL = Database;
 
 export const database = {
+  async checkEmail(email: string) {
+    const obj = [];
+    const response = await fetch(`${DATABASE_URL}/UsersData`);
+    const data = await response.json();
+    for (const i of data) {
+      obj.push({ email: i.email, password: i.password });
+    }
+    const check = obj.find((i: any) => email === i.email);
+    if (check) return true;
+    return false;
+  },
+  async checkPass(email: string, password: string) {
+    const obj = [];
+    const response = await fetch(`${DATABASE_URL}/UsersData`);
+    const data = await response.json();
+    for (const i of data) {
+      obj.push({ uid: i.id, email: i.email, password: i.password });
+    }
+    const check = obj.find((i: any) => email === i.email);
+    if (!check) return false;
+    if (password === check.password) return check.uid;
+    return false;
+  },
   async postFeed(data: {
     id: string;
     uid: string;
@@ -300,9 +323,13 @@ export const database = {
     const result = await response.json();
     return result;
   },
-
   async getUserData(id: string) {
     const response = await fetch(`${DATABASE_URL}/LoginData/${id}`);
+    const result = await response.json();
+    return result;
+  },
+  async getNotification(uid: string) {
+    const response = await fetch(`${DATABASE_URL}/GetNotifications/${uid}`);
     const result = await response.json();
     return result;
   },
@@ -339,6 +366,50 @@ export const database = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
+    const result = await response.json();
+    return result;
+  },
+
+  async addComment(data: {
+    id: string;
+    uid: string;
+    date: string;
+    time: string;
+    username: string;
+    section: string;
+    grade: string;
+    icon: string;
+    text: string;
+  }) {
+    const response = await  fetch(`${DATABASE_URL}/AddComment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    const result = await response.json();
+    return result;
+  },
+
+  async replyComment(data: {
+    commentId: string;
+    uid: string;
+    date: string;
+    time: string;
+    username: string;
+    grade: string;
+    icon: string;
+    text: string;
+  }) {
+    const response = await fetch(`${DATABASE_URL}/ReplyComment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    const result = await response.json();
+    return result;
+  },
+  async commentData(id: string) {
+    const response = await fetch(`${DATABASE_URL}/CommentData/${id}`);
     const result = await response.json();
     return result;
   },

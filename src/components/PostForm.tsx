@@ -98,14 +98,14 @@ const PostForm = ({ setPosts }: {
   };
 
   return (
-    <div className="w-full bg-[#15202B] max-w-xl mx-auto p-4 rounded-xl shadow-md">
-      <div className="flex items-start space-x-4">
-        <Profile src={profileIcon} alt="Profile" />
+    <div className="w-full bg-[#0f0f0f] rounded-2xl p-4 shadow-lg">
+    <div className="flex items-start space-x-4">
+      <Profile src={profileIcon} alt="Profile" />
         <div className="flex-1">
           <textarea
-            className="w-full bg-[#192734] text-white p-3 rounded-xl resize-none focus:outline-none placeholder-gray-500"
+            className="w-full bg-[#262626] text-white p-3 rounded-xl resize-none focus:outline-none placeholder-gray-500"
             rows={3}
-            placeholder="What's happening?"
+            placeholder="Something's about?"
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
@@ -123,7 +123,7 @@ const PostForm = ({ setPosts }: {
                   setMediaType(null);
                   setMediaPreview(null);
                 }}
-                className="absolute top-2 right-2 bg-[#192734] bg-opacity-50 hover:bg-red-500 text-white rounded-full p-1"
+                className="absolute top-2 right-2 bg-gray-400 hover:bg-red-500 text-black rounded-full p-1"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -131,11 +131,11 @@ const PostForm = ({ setPosts }: {
           )}
           <div className="flex items-center justify-between mt-4">
             <div className="flex space-x-3">
-              <label className="cursor-pointer text-[#1DA1F2] hover:text-white">
+              <label className="cursor-pointer text-gray-400">
                 <Image className="w-6 h-6" />
                 <input type="file" accept="image/*" className="hidden" onChange={handleMediaChange} />
               </label>
-              <label className="cursor-pointer text-[#1DA1F2] hover:text-white">
+              <label className="cursor-pointer text-gray-400">
                 <Video className="w-6 h-6" />
                 <input type="file" accept="video/*" className="hidden" onChange={handleMediaChange} />
               </label>
@@ -143,9 +143,9 @@ const PostForm = ({ setPosts }: {
             <button
               onClick={handlePost}
               className={`px-4 py-2 rounded-full font-bold ${
-                isPosting || cooldown > 0 || !text.trim()
-                  ? 'bg-[#38444D] text-gray-500 cursor-not-allowed'
-                  : 'bg-[#1DA1F2] hover:bg-[#1A91DA] text-white'
+      isPosting || cooldown > 0 || !text.trim()
+                  ? 'bg-[#262626] text-gray-500 cursor-not-allowed'
+                  : 'bg-white hover:bg-white text-black'
               }`}
               disabled={isPosting || cooldown > 0 || !text.trim()}
             >

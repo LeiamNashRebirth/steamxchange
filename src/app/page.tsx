@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { database } from "@/utils/database";
-import { Heart, MessageCircle, Pin } from "lucide-react";
+import { Heart, MessageCircle, Pin, Bell } from "lucide-react";
 import PostForm from "@/components/PostForm";
 import CommentSection from "@/components/CommentSection";
 import Images from "@/components/Images";
@@ -18,24 +18,24 @@ const Home = () => {
 
   useEffect(() => {
     const fetchUserDataAndPosts = async () => {
-        const clientUID = localStorage.getItem("clientUID");
-        if (!clientUID) return;
+      const clientUID = localStorage.getItem("clientUID");
+      if (!clientUID) return;
 
-        const allPosts = await database.getFeedData();
-        setPosts(
-          allPosts.map((post: any) => ({
-            ...post,
-            likedByClient: post.liked.includes(clientUID),
-            pinnedByClient: post.pinned.includes(clientUID) || false,
-          }))
-        );
-        setLoading(false);
+      const allPosts = await database.getFeedData();
+      setPosts(
+        allPosts.map((post: any) => ({
+          ...post,
+          likedByClient: post.liked.includes(clientUID),
+          pinnedByClient: post.pinned.includes(clientUID) || false,
+        }))
+      );
+      setLoading(false);
     };
 
     fetchUserDataAndPosts();
   }, [router]);
 
-const handleLike = async (postId: string) => {
+  const handleLike = async (postId: string) => {
     const clientUID = localStorage.getItem("clientUID");
     if (!clientUID) return;
 
@@ -52,21 +52,31 @@ const handleLike = async (postId: string) => {
   };
 
   const handlePin = async (postId: string) => {
-  const clientUID = localStorage.getItem("clientUID");
-  if (!clientUID) return;
+    const clientUID = localStorage.getItem("clientUID");
+    if (!clientUID) return;
 
-  try {
-    const updatedPost = await database.addPin(clientUID, postId);
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId
-          ? { ...post, pins: updatedPost.pins, pinnedByClient: true }
-          : post
-      )
-    );
-  } catch (error) {}
-};
-  
+    try {
+      const updatedPost = await database.addPin(clientUID, postId);
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? { ...post, pins: updatedPost.pins, pinnedByClient: true }
+            : post
+        )
+      );
+    } catch (error) {}
+  };
+
+  const formatDateTime = (dateString: any) => {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "Invalid Date";
+    const options: Intl.DateTimeFormatOptions = {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    };
+    return date.toLocaleDateString(undefined, options);
+  };
 
   const toggleComments = (postId: string) => {
     setVisibleComments((prev) => ({
@@ -80,90 +90,83 @@ const handleLike = async (postId: string) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <div className="text-white border-b border-gray-700 p-4 text-lg font-bold">
-        Home
+    <div className="min-h-screen bg-black text-white px-4 pb-20">
+      {/* Top Header with Notification Icon */}
+      <div className="flex items-center justify-between pt-6">
+        <h1 className="text-white text-lg font-bold">Home</h1>
+        <button onClick={() => router.push("/notification")} className="text-gray-400 hover:text-white transition">
+          <Bell size={24} />
+        </button>
       </div>
 
-      <div className="border-b border-gray-700 p-4">
+      <div className="space-y-6 pt-6">
         <PostForm setPosts={setPosts} />
-      </div>
-
-      {loading ? (
-        <div className="p-4 space-y-4">
-          {[...Array(5)].map((_, index) => (
-            <div key={index} className="bg-gray-800 p-4 rounded-lg space-y-4 animate-pulse">
-              <div className="flex space-x-4">
-                <div className="w-10 h-10 bg-gray-700 rounded-full"></div>
-                <div className="w-32 h-4 bg-gray-700 rounded"></div>
-              </div>
-              <div className="w-full h-4 bg-gray-700 rounded"></div>
-              <div className="w-1/2 h-4 bg-gray-700 rounded"></div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="divide-y divide-gray-700">
-          {posts.map((post) => (
-            <div key={post.id} className="p-4 border-b border-gray-700 hover:bg-gray-900 transition">
-              <div className="flex items-start space-x-4">
-                <UserAvatar userId={post.uid} onClick={() => navigateToProfile(post.uid)} />
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <p className="font-bold text-white cursor-pointer" onClick={() => navigateToProfile(post.uid)}>
+        {loading ? (
+          <div className="flex justify-center py-10 text-lg">Loading...</div>
+        ) : (
+          posts.map((post) => (
+            <div key={post.id} className="bg-[#0f0f0f] rounded-2xl p-4 shadow-lg">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-3">
+                  <UserAvatar userId={post.uid} onClick={() => navigateToProfile(post.uid)} />
+                  <div>
+                    <p className="text-white font-semibold" onClick={() => navigateToProfile(post.uid)}>
                       {post.username}
                     </p>
-                    <p className="text-gray-400 text-sm">{post.section} {post.grade}</p>
+                    <p className="text-gray-400 text-sm" onClick={() => navigateToProfile(post.uid)}>
+                      {post.section} {post.grade}
+                    </p>
                   </div>
-                  <p className="text-gray-300 mt-1">{post.text}</p>
+                </div>
+                <p className="text-gray-400 text-sm" onClick={() => navigateToProfile(post.uid)}>
+                  {formatDateTime(post.date)}
+                </p>
+              </div>
 
-                  {post.attachment && (
-                    <div className="mt-2 rounded-lg overflow-hidden">
-                      {post.type === "video" ? (
-                        <VideoPlayer src={post.attachment} />
-                      ) : (
-                        <Images src={post.attachment} alt="Post Media" />
-                      )}
-                    </div>
-                  )}
+              <p className="text-white mt-2 text-sm">{post.text}</p>
 
-                  <div className="flex text-gray-500 mt-3 gap-x-6">
-                    <button
-                      onClick={() => handleLike(post.id)}
-                      disabled={post.likedByClient}
-                      className={`flex items-center space-x-1 transition ${
-                        post.likedByClient ? "text-red-500" : "hover:text-red-400"
-                      }`}
-                    >
-                      <Heart className={`w-5 h-5 ${post.likedByClient ? "fill-red-500" : ""}`} />
-                      <span>{post.likes}</span>
-                    </button>
-                    <button
-                      onClick={() => toggleComments(post.id)}
-                      className="flex items-center space-x-1 hover:text-blue-400 transition"
-                    >
-                      <MessageCircle className="w-5 h-5" />
-                      <span>{post.comments?.length}</span>
-                    </button>
-                    <button
-                      onClick={() => handlePin(post.id)}
-                      disabled={post.pinnedByClient}
-                      className={`flex items-center space-x-1 transition ${
-                        post.pinnedByClient ? "text-green-500" : "hover:text-green-400"
-                      }`}
-                    >
-                      <Pin className={`w-5 h-5 ${post.pinnedByClient ? "fill-green-500" : ""}`} />
-                      <span>{post.pins}</span>
-                    </button>
+              {post.attachment && (
+                <div className="mt-3 rounded-xl overflow-hidden">
+                  {post.type === "video" ? <VideoPlayer src={post.attachment} /> : <Images src={post.attachment} />}
+                </div>
+              )}
 
-                  </div>
-                  {visibleComments[post.id] && <CommentSection postId={post.id} onClose={() => toggleComments(post.id)} />}
+              <div className="flex justify-between items-center mt-5">
+                <div className="flex space-x-4">
+                  <button
+                    onClick={() => handleLike(post.id)}
+                    disabled={post.likedByClient}
+                    className={`flex items-center space-x-2 text-gray-400 transition ${post.likedByClient ? "text-red-500" : "hover:text-red-400"}`}
+                  >
+                    <Heart className={`${post.likedByClient ? "fill-red-500" : ""}`} />
+                    <span>{post.likes}</span>
+                  </button>
+
+                  <button onClick={() => toggleComments(post.id)} className="flex items-center space-x-2 text-gray-400 hover:text-gray-600 transition">
+                    <MessageCircle />
+                    <span>{post.comments?.length}</span>
+                  </button>
+                </div>
+
+                <div className="flex space-x-4">
+                  <button
+                    onClick={() => handlePin(post.id)}
+                    disabled={post.pinnedByClient}
+                    className={`flex items-center space-x-2 text-gray-400 transition ${
+                      post.pinnedByClient ? "text-orange-500" : "hover:text-orange-400"
+                    }`}
+                  >
+                    <Pin className={`${post.pinnedByClient ? "fill-orange-500" : ""}`} />
+                    <span>{post.pins}</span>
+                  </button>
                 </div>
               </div>
+
+              {visibleComments[post.id] && <CommentSection postId={post.id} onClose={() => toggleComments(post.id)} />}
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 };

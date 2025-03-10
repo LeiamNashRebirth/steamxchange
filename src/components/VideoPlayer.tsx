@@ -80,7 +80,7 @@ const VideoPlayer = ({ src }: VideoPlayerProps) => {
       <video
         ref={videoRef}
         src={src}
-        className="w-full max-h-[400px] object-contain rounded-lg"
+        className="w-full rounded-lg object-contain rounded-lg"
         onTimeUpdate={handleProgress}
         onLoadedMetadata={() => {
           if (videoRef.current) setDuration(formatTime(videoRef.current.duration));

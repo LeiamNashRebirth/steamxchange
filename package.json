@@ -9,6 +9,7 @@
     "lint": "echo 'Skipping ESLint'"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.0",
     "@headlessui/react": "^2.2.0",
     "artplayer": "^5.2.2",
     "autoprefixer": "^10.4.20",
@@ -20,6 +21,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-easy-crop": "^5.2.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "uuid": "^11.0.5"
   },
   "devDependencies": {

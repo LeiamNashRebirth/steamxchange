@@ -19,7 +19,7 @@ const CommentSection = ({ postId, onClose }) => {
 
   const getClientUID = () => (typeof window !== 'undefined' ? localStorage.getItem('clientUID') : null);
 
-  const navigateToProfile = (userId) => {
+  const navigateToProfile = (userId: string) => {
     router.push(`/profile/${userId}`);
   };
 
@@ -27,9 +27,8 @@ const CommentSection = ({ postId, onClose }) => {
     try {
       const clientUID = getClientUID();
       if (!clientUID) return;
-      const allPosts = await database.getFeedData();
-      const post = allPosts.find((post) => post.id === postId);
-      setComments(post?.comments ?? []);
+      const allPosts = await database.commentData(postId);
+      setComments(allPosts ?? []);
     } catch (error) {}
   };
 
@@ -65,7 +64,7 @@ const CommentSection = ({ postId, onClose }) => {
       const user = await database.getUserData(clientUID);
       const newComment = {
         uid: user?.id,
-        id: new Date().toISOString(),
+        id: postId,
         date: new Date().toISOString(),
         time: new Date().toLocaleTimeString(),
         username: user?.name,
@@ -77,7 +76,7 @@ const CommentSection = ({ postId, onClose }) => {
       };
 
       setComments((prev) => [...prev, newComment]);
-      await database.addFeedComment(postId, newComment);
+      await database.addComment(newComment);
       setCommentText('');
       scrollToBottom();
     } catch (error) {} finally {
@@ -85,7 +84,7 @@ const CommentSection = ({ postId, onClose }) => {
     }
   };
 
-  const handleReplySubmit = async (commentDate) => {
+  const handleReplySubmit = async (commentDate: string) => {
     if (!replyText[commentDate]?.trim() || replyLoading[commentDate]) return;
     setReplyLoading((prev) => ({ ...prev, [commentDate]: true }));
     const clientUID = getClientUID();
@@ -94,6 +93,7 @@ const CommentSection = ({ postId, onClose }) => {
     try {
       const user = await database.getUserData(clientUID);
       const newReply = {
+        commentId: postId,
         uid: user?.id,
         date: new Date().toISOString(),
         time: new Date().toLocaleTimeString(),
@@ -113,20 +113,22 @@ const CommentSection = ({ postId, onClose }) => {
       );
 
       setReplyText((prev) => ({ ...prev, [commentDate]: '' }));
-      await database.replyFeedComment(postId, commentDate, newReply);
+      await database.replyComment(newReply);
       scrollToBottom();
     } catch (error) {} finally {
       setReplyLoading((prev) => ({ ...prev, [commentDate]: false }));
     }
   };
 
-  const toggleReplies = (commentDate) => {
+  const toggleReplies = (commentDate: string) => {
     setExpandedReplies((prev) => ({ ...prev, [commentDate]: !prev[commentDate] }));
   };
 
   return (
-    <div className={`fixed inset-0 bg-black text-white z-50 flex flex-col transition-transform ${isVisible ? 'translate-y-0' : 'translate-y-full'}`}>      
-      <div className="flex items-center justify-between px-4 py-3 bg-black">
+    <div className={`fixed bottom-0 left-0 w-full h-[50vh] bg-[#131313] shadow-lg rounded-t-lg transition-transform z-50 ${
+        isVisible ? "translate-y-0" : "translate-y-full"
+      }`}>      
+      <div className="flex items-center justify-between px-4 py-3">
         <h1 className="text-lg font-bold">Comments</h1>
         <button onClick={() => { setIsVisible(false); setTimeout(onClose, 300); }} className="text-gray-400 hover:text-gray-600">
           <X size={24} />
