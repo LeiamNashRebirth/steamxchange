@@ -44,6 +44,16 @@ export async function generateText(prompt: string, clientUID: string) {
   }
 }
 
+export const getText = async(text: string) => {
+    try {
+   const response = await fetch(`${Leiam}/api/badwords?text=${text}`);
+   const data = await response.json();
+     return data.text;
+  } catch (error) {
+     return text;
+ }
+};
+
 export const getContent = async(id: string) => {
     try {
    const response = await fetch(`${Leiam}/video/content/${id}`);

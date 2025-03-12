@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Video, User, Bot } from "lucide-react";
+import { Home, Video, User, Bot, MessageCircleMore } from "lucide-react";
 
 const Navigation = () => {
   const [uid, setUid] = useState<string | null>(null);
@@ -30,6 +30,11 @@ const Navigation = () => {
       <Link href="/ai" className="flex flex-col items-center">
         <Bot className={`w-6 h-6 ${pathname === "/ai" ? "text-white" : "text-gray-400"}`} />
         <span className={`text-xs ${pathname === "/ai" ? "text-white" : "text-gray-400"}`}>Bot</span>
+      </Link>
+
+      <Link href="/globalchat" className="flex flex-col items-center">
+        <MessageCircleMore className={`w-6 h-6 ${pathname === "/globalchat" ? "text-white" : "text-gray-400"}`} />
+        <span className={`text-xs ${pathname === "/globalchat" ? "text-white" : "text-gray-400"}`}>GlobalChat</span>
       </Link>
 
       {uid && (

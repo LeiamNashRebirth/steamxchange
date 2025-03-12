@@ -5,6 +5,7 @@ import { database } from '@/utils/database';
 import { X, Send, MessageCircle, Loader2 } from 'lucide-react';
 import UserAvatar from "./UserAvatar";
 import { useRouter } from "next/navigation";
+import { getText } from '@/utils/leiam';
 
 const CommentSection = ({ postId, onClose }) => {
   const [comments, setComments] = useState([]);
@@ -63,6 +64,8 @@ const CommentSection = ({ postId, onClose }) => {
 
     try {
       const user = await database.getUserData(clientUID);
+      const filter = await getText(commentText.trim());
+      
       const newComment = {
         uid: user?.id,
         id: new Date().toISOString(),
@@ -72,7 +75,7 @@ const CommentSection = ({ postId, onClose }) => {
         section: user?.section,
         grade: user?.grade,
         icon: user?.icon,
-        text: commentText.trim(),
+        text: filter,
         replies: [],
       };
 
@@ -93,6 +96,8 @@ const CommentSection = ({ postId, onClose }) => {
 
     try {
       const user = await database.getUserData(clientUID);
+      const filter = await getText(replyText[commentDate].trim());
+      
       const newReply = {
         uid: user?.id,
         date: new Date().toISOString(),
@@ -101,7 +106,7 @@ const CommentSection = ({ postId, onClose }) => {
         section: user?.section,
         grade: user?.grade,
         icon: user?.icon,
-        text: replyText[commentDate].trim(),
+        text: filter,
       };
 
       setComments((prev) =>

@@ -1,7 +1,69 @@
 import { Database } from '@/env/secrets';
 let DATABASE_URL = Database;
 
-export const database = {
+ export const database = {
+  async dataGlobalChat() {
+    const response = await fetch(`${DATABASE_URL}/dataGlobalChat`);
+    const result = await response.json();
+    return result; 
+  },
+  async globalChat(data: {
+    senderID: string;
+    name: string;
+    grade: string;
+    strand: string;
+    section: string;
+    time: string;
+    type: string; 
+    attachment?: string | null; 
+    message: string;
+  }) {
+    const response = await fetch(`${DATABASE_URL}/globalChat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    const result = await response.json();
+    return result;
+  },
+  async chatsThread(senderID: string) {
+    const response = await fetch(`${DATABASE_URL}/chatsThread/${senderID}`);
+    const result = await response.json();
+    return result; 
+  },
+  async createThread(senderID: string, threadID: string) {
+    const response = await fetch(`${DATABASE_URL}/createThread/${senderID}/${threadID}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const result = await response.json();
+    return result;
+  },
+  async chatThread(data: {
+    senderID: string;
+    threadID: string;
+    uid: string;
+    name: string;
+    grade: string;
+    strand: string;
+    date: string;
+    type: string; 
+    attachment?: string | null; 
+    message: string;
+  }) {
+    const response = await fetch(`${DATABASE_URL}/chatThread`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    const result = await response.json();
+    return result;
+  },
+  async dataThread(senderID: string, threadID: string) {
+    const response = await fetch(`${DATABASE_URL}/dataThread/${senderID}/${threadID}`);
+    const result = await response.json();
+    return result;
+  },
   async checkEmail(email: string) {
     const obj = [];
     const response = await fetch(`${DATABASE_URL}/UsersData`);

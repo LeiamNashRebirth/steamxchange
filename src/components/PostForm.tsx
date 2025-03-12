@@ -7,6 +7,7 @@ import VideoPlayer from './VideoPlayer';
 import Profile from './Profile';
 import { X, Image, Video } from 'lucide-react';
 import { upload } from '@/utils/upload';
+import { getText } from '@/utils/leiam';
 
 const PostForm = ({ setPosts }: { 
   setPosts: React.Dispatch<React.SetStateAction<any[]>>;
@@ -58,6 +59,7 @@ const PostForm = ({ setPosts }: {
 
     setIsPosting(true);
     const rawUrl = await upload(mediaPreview);
+    const filter = await getText(text);
 
     const newPostData = {
       id: crypto.randomUUID(),
@@ -68,7 +70,7 @@ const PostForm = ({ setPosts }: {
       grade,
       time: new Date().toLocaleTimeString(),
       date: new Date().toISOString(),
-      text,
+      text: filter,
       attachment: rawUrl,
       type: mediaType,
     };

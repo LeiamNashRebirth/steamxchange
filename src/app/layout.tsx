@@ -32,7 +32,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
         <AuthGuard>
           {children}
-          {pathname !== "/login" && pathname !== "/create" && <Navigation />}
+          {pathname !== "/login" && pathname !== "/create" && !pathname.startsWith("/chat/") && <Navigation />}
         </AuthGuard>
       </body>
     </html>

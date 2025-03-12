@@ -4,19 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { database } from "@/utils/database";
 import EditProfile from "@/components/EditProfile";
-import { ArrowLeft, MapPin, CalendarCheck2, Grid2x2Check, GraduationCap } from "lucide-react";
+import { ArrowLeft, MapPin, CalendarCheck2, Grid2x2Check, GraduationCap, Pin } from "lucide-react";
 import Image from "@/components/Images";
 import VideoPlayer from "@/components/VideoPlayer";
 
 const formatDateTime = (dateString: any) => {
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return "Invalid Date";
-  const options: Intl.DateTimeFormatOptions = { 
-    month: "short", 
-    day: "numeric", 
-    year: "numeric" 
-  };
-  return date.toLocaleDateString(undefined, options);
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 };
 
 const Profile = () => {
@@ -24,6 +19,8 @@ const Profile = () => {
   const [userData, setUserData] = useState<any>(null);
   const [clientData, setClientData] = useState("");
   const [allPosts, setAllPosts] = useState<any[]>([]);
+  const [allPin, setAllPin] = useState<any[]>([]);
+  const [showPins, setShowPins] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -40,6 +37,7 @@ const Profile = () => {
 
       setUserData(user);
       setAllPosts(posts.filter((post) => post.uid === clientID));
+      setAllPin(user.pin || []);
       setIsOwner(clientUID === clientID);
       setLoading(false);
     };
@@ -54,14 +52,11 @@ const Profile = () => {
           <ArrowLeft size={24} />
         </button>
         <div>
-          {loading ? (
-            <div className="h-5 w-32 bg-[#0f0f0f] rounded-md animate-pulse"></div>
-          ) : (
-            <h1 className="text-lg font-bold">{userData.name}</h1>
-          )}
+          {loading ? <div className="h-5 w-32 bg-[#0f0f0f] rounded-md animate-pulse"></div> : <h1 className="text-lg font-bold">{userData.name}</h1>}
           <p className="text-sm text-gray-400">{allPosts.length} Posts</p>
         </div>
       </div>
+
       {loading ? (
         <div className="animate-pulse">
           <div className="w-full h-48 bg-[#0f0f0f]"></div>
@@ -76,7 +71,7 @@ const Profile = () => {
       ) : (
         <div>
           <div className="relative">
-    <div className="w-full h-48 bg-[#262626]">
+            <div className="w-full h-48 bg-[#262626]">
               {userData.banner && <img src={userData.banner} className="w-full h-full object-cover" />}
             </div>
             <div className="absolute -bottom-12 left-4">
@@ -95,66 +90,68 @@ const Profile = () => {
                   Edit Profile
                 </button>
               ) : (
-                <button onClick={() => router.push(`/message/${clientData}/${userData.id}`)} className="px-4 py-2 bg-[#262626] hover:bg-[#0f0f0f] rounded-full transition">
+                <button onClick={() => router.push(`/chat/${clientID}`)} className="px-4 py-2 bg-[#262626] hover:bg-[#0f0f0f] rounded-full transition">
                   Message
                 </button>
               )}
             </div>
-            <div className="flex items-center text-gray-400 mt-2">
-              <MapPin size={18} className="mr-2" />
-  {userData.address || "No address available"}
-            </div>
-            <div className="flex items-center text-gray-400 mt-1">
-              <CalendarCheck2 size={18} className="mr-2" />
-              Joined {formatDateTime(userData.createdAt)}
-            </div>
-            <div className="flex items-center text-gray-400 mt-1">
-              <Grid2x2Check size={18} className="mr-2" />
-              {userData.schoolID || "No schoolID available"}
-            </div>
-            <div className="flex items-center text-gray-400 mt-1">
-              <GraduationCap size={18} className="mr-2" />
-              {userData.section} {userData.grade}
-            </div>
-          </div>
-        </div>
+
+      <div className="flex items-center text-gray-400 mt-2">
+        <MapPin size={18} className="mr-2" />
+      {userData.address || "No address available"}
+      </div>
+      <div className="flex items-center text-gray-400 mt-1">
+        <CalendarCheck2 size={18} className="mr-2" />
+        Joined {formatDateTime(userData.createdAt)}
+      </div>
+      <div className="flex items-center text-gray-400 mt-1">
+        <Grid2x2Check size={18} className="mr-2" />
+        {userData.schoolID || "No schoolID available"}
+      </div>
+      <div className="flex items-center text-gray-400 mt-1">
+        <GraduationCap size={18} className="mr-2" />
+        {userData.section} {userData.grade}
+      </div>
+      </div>
+      </div>
       )}
 
-      <div className="border-t border-gray-700 px-4">
-        {allPosts.length > 0 ? (
-          allPosts.map((post) => (
-            <div
-              key={post.id}
-              className="bg-[#0f0f0f] rounded-2xl p-4 shadow-lg mb-4"
-            >
-        <div className="flex items-center justify-between mb-3 space-x-3">
-                <img src={userData.icon} alt="Profile" className="w-10 h-10 rounded-full" />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-white">{post.username}</span>
-                      <span className="text-gray-400 text-sm">{post.section} {post.grade}</span>
-                    </div>
-                    <span className="text-gray-500 text-sm">{formatDateTime(post.date)}</span>
+      
+  <div className="flex border-b border-gray-700">
+        <button className={`flex-1 py-2 text-center ${!showPins ? "border-b-2 border-white" : "text-gray-400"}`} onClick={() => setShowPins(false)}>
+          Posts
+        </button>
+        <button className={`flex-1 py-2 text-center ${showPins ? "border-b-2 border-white" : "text-gray-400"}`} onClick={() => setShowPins(true)}>
+          Pinned
+        </button>
+      </div>
+
+<div className="px-4 mt-4">
+        {(showPins ? allPin : allPosts).length > 0 ? (
+          (showPins ? allPin : allPosts).map((post, index) => (
+            <div key={`${showPins ? "pin" : "post"}-${post.id}-${index}`} className="bg-[#0f0f0f] rounded-2xl p-4 shadow-lg mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <img src={userData.icon} className="w-10 h-10 rounded-full" />
+                  <div>
+                    <p className="font-bold text-white">{post.username}</p>
+                    <p className="text-gray-400 text-sm">{formatDateTime(post.date)}</p>
                   </div>
                 </div>
+                {post.pin && <Pin size={18} className="text-gray-400" />}
               </div>
 
-<p className="text-white mt-2 text-sm">{post.text}</p>
+              <p className="text-white mt-2">{post.text}</p>
 
               {post.attachment && (
                 <div className="mt-3 rounded-xl overflow-hidden">
-                  {post.type === "image" ? (
-                    <Image src={post.attachment} />
-                  ) : post.type === "video" ? (
-                    <VideoPlayer src={post.attachment} />
-                  ) : null}
+                  {post.type === "image" ? <Image src={post.attachment} /> : post.type === "video" ? <VideoPlayer src={post.attachment} /> : null}
                 </div>
               )}
             </div>
           ))
         ) : (
-          <p className="text-gray-500 text-center py-6">No posts yet.</p>
+          <p className="text-gray-500 text-center py-6">{showPins ? "No pinned posts yet." : "No posts yet."}</p>
         )}
       </div>
 

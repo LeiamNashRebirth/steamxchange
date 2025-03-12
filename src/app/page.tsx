@@ -91,7 +91,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-black text-white px-4 pb-20">
-      {/* Top Header with Notification Icon */}
+      
       <div className="flex items-center justify-between pt-6">
         <h1 className="text-white text-lg font-bold">Home</h1>
         <button onClick={() => router.push("/notification")} className="text-gray-400 hover:text-white transition">
