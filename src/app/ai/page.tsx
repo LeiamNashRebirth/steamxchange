@@ -46,7 +46,7 @@ const Page = () => {
     return (
         <div className="min-h-screen bg-black text-white px-4 pb-20 flex flex-col">
             <div className="text-white pt-6 text-lg font-bold mb-7">
-                Chatbot
+                A B I G A I L
             </div>
 
             <div className="flex-1 overflow-y-auto pb-20">

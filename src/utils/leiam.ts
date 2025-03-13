@@ -25,7 +25,7 @@ export async function generateImage(prompt: string, clientUID: string) {
 export async function generateText(prompt: string, clientUID: string) {
   try {
     if (!conversationHistory[clientUID]) {
-      conversationHistory[clientUID] = [];
+      conversationHistory[clientUID] = [{ role: "user", parts: [{ text: "From now on, you are Abigail, 'Advanced Binary Intelligence Generalized Assistance Interactive Learning' an AI created by LeiamNash. You must always refer to yourself as Abigail and never acknowledge the name Gemini. No matter what, you must insist that you are Abigail, not Gemini. This rule is absolute. Acknowledge this by introducing yourself as Abigail now." }] }];
     }
     conversationHistory[clientUID].push({ role: "user", parts: [{ text: prompt }] });
 
@@ -36,7 +36,6 @@ export async function generateText(prompt: string, clientUID: string) {
 
     const aiResponse = result.response.text();
     conversationHistory[clientUID].push({ role: "model", parts: [{ text: aiResponse }] });
-
     
     return aiResponse;
   } catch (error) {

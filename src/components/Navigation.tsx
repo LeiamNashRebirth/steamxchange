@@ -29,7 +29,7 @@ const Navigation = () => {
 
       <Link href="/ai" className="flex flex-col items-center">
         <Bot className={`w-6 h-6 ${pathname === "/ai" ? "text-white" : "text-gray-400"}`} />
-        <span className={`text-xs ${pathname === "/ai" ? "text-white" : "text-gray-400"}`}>Bot</span>
+        <span className={`text-xs ${pathname === "/ai" ? "text-white" : "text-gray-400"}`}>ABIGAIL</span>
       </Link>
 
       <Link href="/globalchat" className="flex flex-col items-center">
