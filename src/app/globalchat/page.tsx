@@ -3,10 +3,11 @@
 import { useEffect, useState, useRef } from "react";
 import { upload } from "@/utils/upload";
 import { database } from "@/utils/database";
-import { Send, Image, Loader2, X } from "lucide-react";
+import { Send, Image, File, Download, X, Loader2 } from "lucide-react";
 import Icon from "@/components/Icon";
 import { useRouter } from "next/navigation";
-import { getText } from '@/utils/leiam';
+import { getText } from "@/utils/leiam";
+import Images from "@/components/ImgChat";
 
 const GlobalChat = () => {
   const router = useRouter();
@@ -16,6 +17,7 @@ const GlobalChat = () => {
   const [messages, setMessages] = useState<any[]>([]);
   const [message, setMessage] = useState("");
   const [attachment, setAttachment] = useState<string | null>(null);
+  const [attachmentType, setAttachmentType] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(false);
   const [cooldownTime, setCooldownTime] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -23,21 +25,7 @@ const GlobalChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const [isAtBottom, setIsAtBottom] = useState(true);
-
-  useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      const atBottom =
-        container.scrollHeight - container.scrollTop <= container.clientHeight + 10;
-      setIsAtBottom(atBottom);
-    };
-
-    container.addEventListener("scroll", handleScroll);
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, []);
+  const [shouldScroll, setShouldScroll] = useState(false);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -45,16 +33,18 @@ const GlobalChat = () => {
       setMessages(result || []);
       setLoading(false);
     };
+
     fetchMessages();
     const interval = setInterval(fetchMessages, 1000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    if (isAtBottom || (messages.length > 0 && messages[messages.length - 1].senderID === senderID)) {
+    if (shouldScroll) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      setShouldScroll(false);
     }
-  }, [messages]);
+  }, [messages, shouldScroll]);
 
   const sendMessage = async () => {
     if (!message.trim() && !attachment) return;
@@ -65,6 +55,9 @@ const GlobalChat = () => {
     const user = await database.getUserData(senderID);
     const filter = await getText(message);
 
+    let uploadedUrl = attachment;
+    if (attachment) uploadedUrl = await upload(attachment);
+
     const newMessage = {
       senderID,
       name: user.name,
@@ -72,8 +65,8 @@ const GlobalChat = () => {
       strand: user.strand,
       section: user.section,
       time: new Date().toISOString(),
-      type: attachment ? "attachment" : "message",
-      attachment,
+      type: attachment ? attachmentType : "text",
+      attachment: uploadedUrl,
       message: filter,
     };
 
@@ -81,9 +74,11 @@ const GlobalChat = () => {
     setMessages((prev) => [...prev, newMessage]);
     setMessage("");
     setAttachment(null);
+    setAttachmentType(null);
     setSending(false);
     setCooldown(true);
-    setCooldownTime(10); 
+    setCooldownTime(10);
+    setShouldScroll(true);
 
     const countdown = setInterval(() => {
       setCooldownTime((prev) => {
@@ -96,14 +91,20 @@ const GlobalChat = () => {
     }, 1000);
   };
 
-  const handleFileUpload = async (event: any) => {
+  const handleFileUpload = (event: any) => {
     const file = event.target.files[0];
     if (!file) return;
 
     const url = URL.createObjectURL(file);
     setAttachment(url);
-    const rawUrl = await upload(url);
-    setAttachment(rawUrl);
+
+    if (file.type.startsWith("image")) {
+      setAttachmentType("image");
+    } else if (file.type.startsWith("video")) {
+      setAttachmentType("video");
+    } else {
+      setAttachmentType("file");
+    }
   };
 
   const navigateToProfile = (userId: string) => {
@@ -112,59 +113,38 @@ const GlobalChat = () => {
 
   return (
     <div className="min-h-screen bg-black text-white px-4 pb-20 flex flex-col">
-    
       <div className="text-white pt-6 text-lg font-bold px-4 mb-3">GlobalChat</div>
 
-      <div
-        ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto py-2 space-y-3 pb-20 mb-3"
-      >
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto py-2 space-y-3 pb-20 mb-3">
         {loading ? (
           <div className="text-gray-400 text-center mt-5">Loading messages...</div>
         ) : messages.length === 0 ? (
           <div className="text-gray-400 text-center mt-5">Start your conversation</div>
         ) : (
           messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`flex ${msg.senderID === senderID ? "justify-end" : "justify-start"}`}
-            >
+            <div key={index} className={`flex ${msg.senderID === senderID ? "justify-end" : "justify-start"}`}>
               {msg.senderID !== senderID && (
                 <div className="mr-2 flex flex-col items-center">
                   <Icon userId={msg.senderID} onClick={() => navigateToProfile(msg.senderID)} />
                 </div>
               )}
               <div className="flex flex-col max-w-[75%]">
-                {msg.senderID !== senderID && (
-                  <p className="text-xs text-gray-400 mb-1">{msg.name}</p>
-                )}
-                <div
-                  className={`p-3 rounded-2xl ${
-                    msg.senderID === senderID
-                      ? "bg-gray-800 text-white"
-                      : "bg-[#1E1E1E] text-gray-300"
-                  } shadow-md`}
-                >
-                  {msg.attachment && msg.type === "attachment" ? (
-                    msg.attachment.endsWith(".mp4") ? (
-                      <video src={msg.attachment} controls className="mt-2 rounded-lg w-full" />
-                    ) : msg.attachment.match(/\.(jpg|jpeg|png|gif)$/) ? (
-                      <img
-                        src={msg.attachment}
-                        alt="Attachment"
-                        className="mt-2 rounded-lg w-full"
-                      />
-                    ) : (
-                      <a
-                        href={msg.attachment}
-                        target="_blank"
-                        className="mt-2 text-gray-400 underline"
-                      >
-                        {msg.attachment}
+                {msg.senderID !== senderID && <p className="text-xs text-gray-400 mb-1">{msg.name}</p>}
+                <div className={`p-3 rounded-2xl ${msg.senderID === senderID ? "bg-gray-800 text-white" : "bg-[#1E1E1E] text-gray-300"} shadow-md`}>
+                  {msg.type === "image" ? (
+                <Images src={msg.attachment} />
+                  ) : msg.type === "video" ? (
+                    <video src={msg.attachment} controls className="rounded-lg w-full max-w-xs" />
+                  ) : msg.type === "file" ? (
+    <div className="flex items-center space-x-2">
+                      <File size={60} className="text-gray-400" />
+                      <a href={msg.attachment} target="_blank" className="text-gray-400 truncate">{msg.attachment.replace("https://raw.githubusercontent.com/LeiamNashRebirth/storage/main/leiamnash_", "")}</a>
+            <a href={msg.attachment} download>
+                        <Download size={20} className="text-white" />
                       </a>
-                    )
+                    </div>
                   ) : (
-                    <p className="text-lg">{msg.message}</p>
+        <p className="text-lg">{msg.message}</p>
                   )}
                 </div>
               </div>
@@ -175,20 +155,23 @@ const GlobalChat = () => {
       </div>
 
       {attachment && (
-        <div className="p-4 bg-gray-900 flex items-center">
-          {attachment.endsWith(".mp4") ? (
-            <video src={attachment} controls className="w-32 h-32 rounded-lg" />
-          ) : attachment.match(/\.(jpg|jpeg|png|gif)$/) ? (
-            <img src={attachment} alt="Preview" className="w-32 h-32 rounded-lg" />
+        <div className="fixed rounded-lg bottom-16 left-0 right-0 w-full px-4 pb-20 mb-12">
+          <div className="flex items-center bg-[#262626] p-3 rounded-xl w-full max-w-2xl mx-auto">
+          {attachmentType === "image" ? (
+            <img src={attachment} alt="Preview" className="w-40 h-full rounded-lg" />
+          ) : attachmentType === "video" ? (
+            <video src={attachment} controls className="w-40 h-full rounded-lg" />
           ) : (
-            <a href={attachment} target="_blank" className="text-gray-400 truncate">
-              {attachment}
-            </a>
+<div className="flex items-center space-x-2">
+  <File size={24} className="text-gray-400" />
+              <span className="text-gray-400 truncate w-32">{attachment.replace("blob:https://stemxchange.vercel.app/", "")}</span>
+              <button onClick={() => setAttachment(null)} className="text-red-500">
+                <X size={24} />
+              </button>
+            </div>
           )}
-          <button className="ml-4 text-red-500" onClick={() => setAttachment(null)}>
-            <X size={24} />
-          </button>
         </div>
+      </div>
       )}
 
       <div className="fixed bottom-16 left-0 right-0 w-full px-4 mb-7">
@@ -207,15 +190,7 @@ const GlobalChat = () => {
             disabled={cooldown}
           />
 
-          <button
-            className={`ml-2 p-2 rounded-full transition ${
-              cooldown
-                ? "opacity-50 cursor-not-allowed bg-gray-600"
-                : "bg-gray-700 hover:bg-gray-600"
-            }`}
-            onClick={sendMessage}
-            disabled={cooldown}
-          >
+          <button className={`ml-2 p-2 rounded-full ${cooldown ? "opacity-50 cursor-not-allowed bg-gray-600" : "bg-gray-700 hover:bg-gray-600"}`} onClick={sendMessage} disabled={cooldown}>
             {sending ? <Loader2 size={24} className="animate-spin" /> : <Send size={24} />}
           </button>
         </div>
