@@ -9,7 +9,7 @@ let DATABASE_URL = Database;
   },
   async globalChat(data: {
     senderID: string;
-    name: string;
+    name: string; 
     grade: string;
     strand: string;
     section: string;
@@ -97,7 +97,7 @@ let DATABASE_URL = Database;
     time: string;
     date: string;
     text: string;
-    attachment?: string | null;
+    attachment?: string | string[] | null;
     type: string;
   }) {
     const response = await fetch(`${DATABASE_URL}/FeedPost`, {
@@ -117,6 +117,18 @@ let DATABASE_URL = Database;
     const result = await response.json();
     return result;
   },
+
+   async imageFeed(id: string, data: {
+     images: string[];
+   }) {
+     const response = await fetch(`${DATABASE_URL}/FeedAddImage/${id}`, {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify(data),
+     });
+     const result = await response.json();
+     return result;
+   },
 
   async addFeedComment(id: string, data: {
     uid: string;
@@ -282,79 +294,120 @@ let DATABASE_URL = Database;
     return result;
   },
 
-  async postDiscussion(data: {
-    id: string;
-    icon: string;
-    section: string;
-    username: string;
-    strand: string;
-    grade: string;
-    time: string;
-    date: string;
-    text: string;
-    image?: string | null;
-  }) {
-    const response = await fetch(`${DATABASE_URL}/DiscussPost`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    const result = await response.json();
-    return result;
-  },
 
-  async likeDiscussion(id: string) {
-    const response = await fetch(`${DATABASE_URL}/DiscussAddLike/${id}`, {
-      method: 'POST',
-    });
-    const result = await response.json();
-    return result;
-  },
+   async postDiscussion(data: {
+     id: string;
+     uid: string;
+     username: string;
+     icon: string;
+     section: string;
+     grade: string;
+     time: string;
+     date: string;
+     title: string;
+     question: string;
+     attachment?: string | string[] | null;
+     type: string;
+   }) {
+     const response = await fetch(`${DATABASE_URL}/DiscussPost`, {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify(data),
+     });
+     console.log(response);
+     const result = await response.json();
+     return result;
+   },
 
-  async addDiscussionComment(id: string, data: {
-    date: string;
-    time: string;
-    section: string;
-    username: string;
-    strand: string;
-    grade: string;
-    icon: string;
-    text: string;
-  }) {
-    const response = await fetch(`${DATABASE_URL}/DiscussAddComment/${id}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    const result = await response.json();
-    return result;
-  },
+   async addPinDiscussion(uid: string, id: string) {
+       const userpin = await fetch(`${DATABASE_URL}/UserPin/${uid}/${id}/discussions`, {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+       });
+     const feedpin = await fetch(`${DATABASE_URL}/DiscussAddPin/${uid}/${id}`, {
+       method: 'POST',
+       headers: { "Content-Type": "application/json" },
+     });
+     const feed = await feedpin.json();
+     const result = await userpin.json();
+     return result + feed;
+   },
 
-  async replyDiscussionComment(id: string, commentId: string, data: {
-    date: string;
-    time: string;
-    section: string;
-    username: string;
-    strand: string;
-    grade: string;
-    icon: string;
-    text: string;
-  }) {
-    const response = await fetch(`${DATABASE_URL}/DiscussReplyComment/${id}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...data, commentId }),
-    });
-    const result = await response.json();
-    return result;
-  },
+   async likeDiscussion(id: string, client: string) {
+     const response = await fetch(`${DATABASE_URL}/DiscussAddLike/${id}/${client}`, {
+       method: 'POST',
+     });
+     const result = await response.json();
+     return result;
+   },
 
-  async getDiscussionData() {
-    const response = await fetch(`${DATABASE_URL}/DiscussData`);
-    const result = await response.json();
-    return result;
-  },
+   async dislikeDiscussion(id: string, client: string) {
+      const response = await fetch(`${DATABASE_URL}/DiscussAddDislike/${id}/${client}`, {
+        method: 'POST',
+      });
+      const result = await response.json();
+      return result;
+    },
 
+    async imageDiscussion(id: string, data: {
+      images: string[];
+    }) {
+      const response = await fetch(`${DATABASE_URL}/DiscussAddImage/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      return result;
+    },
+
+   async addDiscussionComment(id: string, data: {
+     uid: string;
+     date: string;
+     time: string;
+     username: string;
+     section: string;
+     grade: string;
+     icon: string;
+     text: string;
+   }) {
+     const response = await  fetch(`${DATABASE_URL}/DiscussAddComment/${id}`, {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify(data),
+     });
+     const result = await response.json();
+     return result;
+   },
+
+   async replyDiscussionComment(id: string, commentId: string, data: {
+     uid: string;
+     date: string;
+     time: string;
+     username: string;
+     grade: string;
+     icon: string;
+     text: string;
+   }) {
+     const response = await fetch(`${DATABASE_URL}/DiscussReplyComment/${id}`, {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ ...data, commentId }),
+     });
+     const result = await response.json();
+     return result;
+   },
+
+   async getDiscussionData() {
+     const response = await fetch(`${DATABASE_URL}/DiscussData`);
+     const data = await response.json();
+   for (let i = data.length - 1; i > 0; i--) {
+   const j = Math.floor(Math.random() * (i + 1));
+    [data[i], data[j]] = [data[j], data[i]];
+   };
+     return data;
+   },
+   
   async loginUser(data: {
     id: string;
     email: string;
@@ -400,6 +453,7 @@ let DATABASE_URL = Database;
     banner: string | null;
     icon: string | null;
     address: string | null;
+    password: string | null;
     ban: boolean | false;
   }) {
       const response = await fetch(`${DATABASE_URL}/UpdateUser/${id}`, {
@@ -411,7 +465,7 @@ let DATABASE_URL = Database;
     return result;
   },
   async addPin(uid: string, id: string) {
-      const userpin = await fetch(`${DATABASE_URL}/UserPin/${uid}/${id}`, {
+      const userpin = await fetch(`${DATABASE_URL}/UserPin/${uid}/${id}/feed`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });

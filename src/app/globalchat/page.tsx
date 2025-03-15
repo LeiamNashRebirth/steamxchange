@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { upload } from "@/utils/upload";
 import { database } from "@/utils/database";
-import { Send, Image, File, Download, X, Loader2 } from "lucide-react";
+import { Send, CloudUpload, File, Download, X, Loader2 } from "lucide-react";
 import Icon from "@/components/Icon";
 import { useRouter } from "next/navigation";
 import { getText } from "@/utils/leiam";
@@ -131,20 +131,28 @@ const GlobalChat = () => {
               <div className="flex flex-col max-w-[75%]">
                 {msg.senderID !== senderID && <p className="text-xs text-gray-400 mb-1">{msg.name}</p>}
                 <div className={`p-3 rounded-2xl ${msg.senderID === senderID ? "bg-gray-800 text-white" : "bg-[#1E1E1E] text-gray-300"} shadow-md`}>
-                  {msg.type === "image" ? (
-                <Images src={msg.attachment} />
-                  ) : msg.type === "video" ? (
-                    <video src={msg.attachment} controls className="rounded-lg w-full max-w-xs" />
-                  ) : msg.type === "file" ? (
-    <div className="flex items-center space-x-2">
-                      <File size={60} className="text-gray-400" />
-                      <a href={msg.attachment} target="_blank" className="text-gray-400 truncate">{msg.attachment.replace("https://raw.githubusercontent.com/LeiamNashRebirth/storage/main/leiamnash_", "")}</a>
-            <a href={msg.attachment} download>
-                        <Download size={20} className="text-white" />
-                      </a>
-                    </div>
-                  ) : (
-        <p className="text-lg">{msg.message}</p>
+      <p className="text-lg">{msg.message}</p>
+                  {msg.attachment && (
+                    msg.type === "image" ? (
+                      <Images src={msg.attachment} />
+                    ) : msg.type === "video" ? (
+                      <video src={msg.attachment} controls className="rounded-lg w-full max-w-xs" />
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <File size={60} className="text-gray-400" />
+                        <a
+                          href={msg.attachment}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-400 truncate"
+                        >
+                          {msg.attachment.replace("https://raw.githubusercontent.com/LeiamNashRebirth/storage/main/leiamnash_", "")}
+                        </a>
+                        <a href={msg.attachment} download>
+                          <Download size={20} className="text-white" />
+                        </a>
+                      </div>
+                    )
                   )}
                 </div>
               </div>
@@ -177,7 +185,7 @@ const GlobalChat = () => {
       <div className="fixed bottom-16 left-0 right-0 w-full px-4 mb-7">
         <div className="flex items-center bg-[#262626] p-3 rounded-xl w-full max-w-2xl mx-auto">
           <button onClick={() => fileInputRef.current?.click()} className="text-gray-400">
-            <Image size={24} />
+            <CloudUpload size={24} />
           </button>
           <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} />
 

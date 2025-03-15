@@ -5,20 +5,20 @@ import { database } from '@/utils/database';
 import Notification from './Notification';
 import VideoPlayer from './VideoPlayer';
 import Profile from './Profile';
-import { X, Image, Video } from 'lucide-react';
+import { X, Image, Video, FileText, File } from 'lucide-react';
 import { upload } from '@/utils/upload';
 import { getText } from '@/utils/leiam';
 
-const PostForm = ({ setPosts }: { 
-  setPosts: React.Dispatch<React.SetStateAction<any[]>>;
-}) => {
-  const [text, setText] = useState('');
+const PostForm = ({ setPosts }: { setPosts: React.Dispatch<React.SetStateAction<any[]>> }) => {
+  const [title, setTitle] = useState('');
+  const [question, setQuestion] = useState('');
   const [profileIcon, setProfileIcon] = useState('');
   const [isPosting, setIsPosting] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
+  const [mediaType, setMediaType] = useState<'image' | 'video' | 'file' | 'text' | null>(null);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
 
@@ -57,7 +57,10 @@ const PostForm = ({ setPosts }: {
     const userData = await database.getUserData(clientUID);
     const { section, name, grade, icon } = userData;
 
-    if (!text.trim() && imagePreviews.length === 0 && !videoPreview) return;
+    if (!title.trim() || !question.trim()) {
+      setNotification({ message: 'Title and question are required.', type: 'error' });
+      return;
+    }
 
     setIsPosting(true);
 
@@ -74,34 +77,41 @@ const PostForm = ({ setPosts }: {
       videoUrl = await upload(videoPreview);
     }
 
-    const filter = await getText(text);
+    let fileUrl: string | null = null;
+    if (filePreview) {
+      fileUrl = await upload(filePreview);
+    }
 
-    const newPostData = {
+    const filteredQuestion = await getText(question);
+
+    const newDiscussionData = {
       id: crypto.randomUUID(),
       uid: clientUID,
       username: name,
       icon,
       section,
       grade,
+      title: title.trim(),
+      question: filteredQuestion,
       time: new Date().toLocaleTimeString(),
       date: new Date().toISOString(),
-      text: filter,
-      attachment: videoUrl || imageUrls, // Store either video URL or an array of image URLs
-      type: videoPreview ? 'video' : 'image',
+      attachment: videoUrl || fileUrl || imageUrls,
+      type: mediaType,
     };
 
-    const result = await database.postFeed(newPostData);
+    const result = await database.postDiscussion(newDiscussionData);
 
     if (result) {
-      setPosts((prevPosts) => [newPostData, ...prevPosts]);
-      setText('');
+      setPosts((prevPosts) => [newDiscussionData, ...prevPosts]);
+      setTitle('');
+      setQuestion('');
       setMediaType(null);
       setImagePreviews([]);
       setImageFiles([]);
       setVideoPreview(null);
       setCooldown(60);
     } else {
-      setNotification({ message: 'Failed to create post. Please try again later.', type: 'error' });
+      setNotification({ message: 'Failed to create discussion. Please try again later.', type: 'error' });
     }
 
     setIsPosting(false);
@@ -111,14 +121,18 @@ const PostForm = ({ setPosts }: {
     if (e.target.files) {
       const files = Array.from(e.target.files);
       const file = files[0];
-
-      if (file.type.startsWith('video/')) {
+ if (file.type.startsWith('video/')) {
         setMediaType('video');
-        setVideoPreview(URL.createObjectURL(file));
-      } else {
+  setVideoPreview(URL.createObjectURL(file));
+  } else if (file.type.startsWith('image/')) {
         setMediaType('image');
         setImagePreviews((prev) => [...prev, ...files.map((file) => URL.createObjectURL(file))]);
         setImageFiles((prev) => [...prev, ...files]);
+  } else if (!file.type) {
+        setMediaType('text');
+  } else {
+        setMediaType('file');
+    setFilePreview(URL.createObjectURL(file));
       }
     }
   };
@@ -133,12 +147,18 @@ const PostForm = ({ setPosts }: {
       <div className="flex items-start space-x-4">
         <Profile src={profileIcon} alt="Profile" />
         <div className="flex-1">
+          <input
+            className="w-full bg-[#262626] text-white p-3 rounded-xl focus:outline-none placeholder-gray-500"
+            placeholder="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
           <textarea
-            className="w-full bg-[#262626] text-white p-3 rounded-xl resize-none focus:outline-none placeholder-gray-500"
+            className="w-full bg-[#262626] text-white p-3 mt-2 rounded-xl resize-none focus:outline-none placeholder-gray-500"
             rows={3}
-            placeholder="Something's about?"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
+            placeholder="Ask your question..."
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
           />
 
           {/* Image Previews */}
@@ -171,6 +191,21 @@ const PostForm = ({ setPosts }: {
             </div>
           )}
 
+          {/* File Preview */}
+          {filePreview && (
+            <div className="relative mt-4 flex items-center space-x-2">
+              <File size={24} className="text-gray-400" />
+              <span className="text-gray-400 truncate max-w-[150px]">{filePreview}</span>
+              <button
+                onClick={() => setFilePreview(null)}
+                className="bg-gray-400 hover:bg-red-500 text-black rounded-full p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+          
+
           <div className="flex items-center justify-between mt-4">
             <div className="flex space-x-3">
               <label className="cursor-pointer text-gray-400">
@@ -181,15 +216,19 @@ const PostForm = ({ setPosts }: {
                 <Video className="w-6 h-6" />
                 <input type="file" accept="video/*" className="hidden" onChange={handleMediaChange} />
               </label>
+               <label className="cursor-pointer text-gray-400">
+              <FileText className="w-6 h-6" />
+              <input type="file" accept="*/*" className="hidden" onChange={handleMediaChange} />
+            </label>
             </div>
             <button
               onClick={handlePost}
               className={`px-4 py-2 rounded-full font-bold ${
-                isPosting || cooldown > 0 || (!text.trim() && imagePreviews.length === 0 && !videoPreview)
+                isPosting || cooldown > 0 || !title.trim() || !question.trim()
                   ? 'bg-[#262626] text-gray-500 cursor-not-allowed'
                   : 'bg-white hover:bg-white text-black'
               }`}
-              disabled={isPosting || cooldown > 0 || (!text.trim() && imagePreviews.length === 0 && !videoPreview)}
+              disabled={isPosting || cooldown > 0 || !title.trim() || !question.trim()}
             >
               {cooldown > 0 ? `Wait ${cooldown}s` : isPosting ? 'Posting...' : 'Post'}
             </button>
