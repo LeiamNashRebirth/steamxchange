@@ -82,6 +82,7 @@ const EditProfile = ({ userData, setEditOpen }) => {
       address,
       icon: finalIcon,
       banner: finalBanner,
+      password: null,
       ban: false
     });
 

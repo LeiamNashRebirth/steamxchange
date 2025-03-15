@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { database } from "@/utils/database";
 import { Star, StarOff, MessageCircle, Pin, FileText, Download } from "lucide-react";
 import PostForm from "@/components/PostFormDiscussion";
-import CommentSection from "@/components/CommentSection";
+import CommentSection from "@/components/CommentSectionDiscuss";
 import UserAvatar from "@/components/UserAvatar";
 import Images from "@/components/Images";
 import VideoPlayer from "@/components/VideoPlayer";
