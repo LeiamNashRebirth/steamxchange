@@ -94,7 +94,26 @@ const Feed = () => {
       <div className="space-y-6 pt-6">
         <PostForm setPosts={setPosts} />
         {loading ? (
-          <div className="flex justify-center py-10 text-lg">Loading...</div>
+          <div className="space-y-6">
+  {Array.from({ length: 3 }).map((_, index) => (
+    <div key={index} className="bg-[#0f0f0f] rounded-2xl p-4 shadow-lg animate-pulse">
+      <div className="flex items-center space-x-3 mb-3">
+      <div className="w-10 h-10 bg-gray-700 rounded-full"></div>
+      <div className="space-y-2">
+      <div className="w-24 h-4 bg-gray-700 rounded"></div>
+      <div className="w-20 h-3 bg-gray-700 rounded"></div>
+                  </div>
+                </div>
+                <div className="w-full h-4 bg-gray-700 rounded mb-2"></div>
+                <div className="w-3/4 h-4 bg-gray-700 rounded mb-2"></div>
+                <div className="w-1/2 h-4 bg-gray-700 rounded"></div>
+                <div className="mt-4 flex space-x-4">
+                  <div className="w-8 h-8 bg-gray-700 rounded"></div>
+                  <div className="w-8 h-8 bg-gray-700 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
           posts.map((post) => (
             <div key={post.id} className="bg-[#0f0f0f] rounded-2xl p-4 shadow-lg">

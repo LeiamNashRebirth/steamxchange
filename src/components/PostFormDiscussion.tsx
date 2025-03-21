@@ -64,14 +64,12 @@ const PostForm = ({ setPosts }: { setPosts: React.Dispatch<React.SetStateAction<
 
     setIsPosting(true);
 
-    // Upload images
     let imageUrls: string[] = [];
     for (const file of imageFiles) {
       const url = await upload(URL.createObjectURL(file));
       imageUrls.push(url);
     }
 
-    // Upload video
     let videoUrl: string | null = null;
     if (videoPreview) {
       videoUrl = await upload(videoPreview);
@@ -161,10 +159,9 @@ const PostForm = ({ setPosts }: { setPosts: React.Dispatch<React.SetStateAction<
             onChange={(e) => setQuestion(e.target.value)}
           />
 
-          {/* Image Previews */}
           {imagePreviews.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-4">
-              {imagePreviews.map((src, index) => (
+           {imagePreviews.map((src, index) => (
                 <div key={index} className="relative">
                   <img src={src} alt="Preview" className="w-full h-32 object-cover rounded-lg" />
                   <button
@@ -178,7 +175,6 @@ const PostForm = ({ setPosts }: { setPosts: React.Dispatch<React.SetStateAction<
             </div>
           )}
 
-          {/* Video Preview */}
           {videoPreview && (
             <div className="relative mt-4">
               <VideoPlayer src={videoPreview} />
@@ -191,11 +187,10 @@ const PostForm = ({ setPosts }: { setPosts: React.Dispatch<React.SetStateAction<
             </div>
           )}
 
-          {/* File Preview */}
           {filePreview && (
             <div className="relative mt-4 flex items-center space-x-2">
               <File size={24} className="text-gray-400" />
-              <span className="text-gray-400 truncate max-w-[150px]">{filePreview}</span>
+              <span className="text-gray-400 truncate max-w-[150px]">{filePreview.replace("blob:https://stemxchange.vercel.app/", "")}</span>
               <button
                 onClick={() => setFilePreview(null)}
                 className="bg-gray-400 hover:bg-red-500 text-black rounded-full p-1"
