@@ -4,7 +4,6 @@ import { useState, useEffect} from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useRouter } from "next/navigation";
 import { sendVerificationCode } from '@/utils/email';
-import { v4 as uuidv4 } from 'uuid';
 import { database } from '@/utils/database';
 import Link from "next/link";
 
@@ -48,11 +47,17 @@ const Signup = () => {
   const [emailExists, setEmailExists] = useState(false);
    const router = useRouter();
 
+  function userID(): string {
+    const timestamp = Date.now().toString().slice(-9); 
+    const random = Math.floor(100000 + Math.random() * 900000).toString();
+    return timestamp + random;
+  }
+
   useEffect(() => {
     const checkClientLogin = async () => {
       let clientUID = localStorage.getItem('clientUID');
       if (!clientUID) {
-        clientUID = uuidv4();
+        clientUID = userID();
         localStorage.setItem('clientUID', clientUID);
       }
       try {
@@ -64,6 +69,31 @@ const Signup = () => {
     };
     checkClientLogin();
   }, [router]);
+
+  useEffect(() => {
+    const savedStep = localStorage.getItem('signupStep');
+    const savedData = localStorage.getItem('signupData');
+
+    if (savedStep) setStep(Number(savedStep));
+    if (savedData) {
+      const data = JSON.parse(savedData);
+      setName(data.name || '');
+      setEmail(data.email || '');
+      setDob(data.dob || '');
+      setOtp(data.otp || '');
+      setPassword(data.password || '');
+      setGradeLevel(data.gradeLevel || '');
+      setSection(data.section || '');
+      setAdviser(data.adviser || null);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('signupStep', String(step));
+    localStorage.setItem('signupData', JSON.stringify({
+      name, email, dob, otp, password, gradeLevel, section, adviser
+    }));
+  }, [step, name, email, dob, otp, password, gradeLevel, section, adviser]);
 
   const handleDobChange = (e) => {
   const selectedDate = new Date(e.target.value);
